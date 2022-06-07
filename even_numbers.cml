@@ -1,0 +1,81 @@
+
+(*  library functions *)
+
+(* print a line *)
+fun println str = TextIO.print (str ^ "\n");
+
+(* converts byte_array to space separated string of byte (int) *)
+fun byte_array_to_string byte_array =
+  String.concatWith " "
+    (List.genlist
+      (fn i => Int.toString (Word8.toInt (Word8Array.sub byte_array i)))
+      (Word8Array.length byte_array));
+
+(* Transforms byte_array -> Word8.word list  *)
+(* requrires len <= Word8Array.length byte_array *)
+fun byte_array_to_byte_list byte_array offset len =
+  List.drop
+    (List.genlist
+      (fn i => Word8Array.sub byte_array i)
+      len)
+    offset;
+
+(* adds a list of bytes to a byte_array *)
+(* assumes:  offset + List.length ls <= Word8Array.length buf *)
+fun byte_list_to_byte_array buf ls offset =
+  let
+    val len_ls = List.length ls;
+    val len_buf = Word8Array.length buf;
+    val _ =
+      List.mapi
+      (fn i => fn x => Word8Array.update buf (Int.+ offset i) x)
+      ls
+  in
+    ()
+  end;
+
+(* ffi function wrapper *)
+
+(*
+  filters number from 0 up to before length
+  filter 4  gives  [0, 2]
+*)
+fun even_numbers_upto length =
+  let
+    val _ = println ("cml even_numbers_upto: buffer of length " ^ (Int.toString length)
+              ^ " plus header");
+    val buf = Word8Array.array (Int.+ length 2) (Word8.fromInt 0);
+    (* fill buffer past the header with numbers i:  0 <= i < length *)
+    val _ = byte_list_to_byte_array buf (List.genlist Word8.fromInt length) 2
+    (* write length header to buffer *)
+    val _ = Marshalling.n2w2 length buf 0;
+    (* buf = length:w8{2} [0; length] *)
+    val _ = println ("cml even_numbers_upto: " ^ (byte_array_to_string buf))
+    (* either use even_numbers_upto or even_numbers_upto_malloc_buf *)
+    (* val _ = #(even_numbers_upto) "" buf; *)
+    val _ = #(even_numbers_upto_malloc_buf) "" buf;
+    (* buf = length:w8{2} msg:w8{length} *)
+    val actual_length = Marshalling.w22n buf 0;
+    val _ = println("cml even_numbers_upto: written message length "
+              ^ (Int.toString actual_length));
+    val _ = println ("cml even_numbers_upto: " ^ (byte_array_to_string buf));
+  in
+(* print_pp (pp_word8array ) *)
+    List.map Word8.toInt
+      (byte_array_to_byte_list buf 2 actual_length)
+  end;
+
+
+(* main function *)
+
+fun main () =
+  let
+    val ls = even_numbers_upto 14;
+  in (
+    print_pp (pp_list pp_int ls);
+    println ""
+  )
+  end;
+
+main ();
+
