@@ -79,3 +79,6 @@ fun main () =
 
 main ();
 
+(*
+vim: ft=sml
+*)
