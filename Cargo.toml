@@ -9,5 +9,6 @@ edition = "2021"
 libc = "*"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib"] # dynamic lib
+# crate-type = ["staticlib"]
 
