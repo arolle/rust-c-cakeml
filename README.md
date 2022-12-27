@@ -1,4 +1,4 @@
-# An example for using Rust and C as a CakeML FFI
+# An example for using Rust (and C) as a CakeML FFI
 
 Today the [CakeML language](https://cakeml.org) provides a library of
 approximately 370 operations on common datastructures like lists, hashmaps,
@@ -42,6 +42,9 @@ cml: #(even_numbers_upto)
 	c: return void
 cml: <next instruction>
 ```
+
+Instead of the above, Rust may directly operate on CakeML buffers, compare to
+the Rust function `ffirust_even_numbers_upto`.
 
 ## Usage
 

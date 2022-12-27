@@ -54,8 +54,9 @@ fun even_numbers_upto length =
     (* either use even_numbers_upto or even_numbers_upto_malloc_buf *)
 (*
     val _ = #(even_numbers_upto) "" buf;
-*)
     val _ = #(even_numbers_upto_malloc_buf) "" buf;
+*)
+    val _ = #(rust_even_numbers_upto) "" buf;
     (* buf = length:w8{2} msg:w8{length} *)
     val actual_length = Marshalling.w22n buf 0;
     val _ = println("cml even_numbers_upto: written message length "

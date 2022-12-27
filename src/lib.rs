@@ -1,4 +1,5 @@
 #![allow(unused_unsafe)]
+#![allow(unused_variables)]
 extern crate libc;
 
 /// returns an array of at most size len
@@ -102,5 +103,58 @@ fn slice_to_malloc_buf (xs: &'_ [u8]) -> *mut libc::c_void
     )};
     dst.copy_from_slice(src);
     ptr
+}
+
+/// operates directly on the CakeML provided buffers
+/// signature of this function in C syntax:
+/// ```c
+/// extern void ffirust_even_numbers_upto (unsigned char *c, long clen,
+///   unsigned char *a, long alen)
+/// ```
+#[no_mangle]
+pub extern "C"
+fn ffirust_even_numbers_upto (
+    c : *const libc::c_uchar,
+    clen: *const libc::c_long,
+    a : *mut libc::c_uchar,
+    alen: *mut libc::c_long,
+) -> () {
+
+/*
+    // turns  c  into a slice
+    let c_buf : &[u8] = unsafe{
+        assert!(!clen.is_null());
+        assert!(!c.is_null());
+        core::slice::from_raw_parts(c, clen as usize)
+    };
+*/
+
+    // turns  a  into a mutuable slice
+    // https://doc.rust-lang.org/std/slice/fn.from_raw_parts_mut.html
+    let a_buf : &mut [u8] = unsafe{
+        assert!(!alen.is_null());
+        assert!(!a.is_null());
+        core::slice::from_raw_parts_mut(a, alen as usize)
+    };
+
+    let from = 2; // filter from index
+    let buf = a_buf;
+
+    let buf_len = buf.len();
+    let mut len : usize = from;
+    for i in from..buf.len() {
+        // assert!(from <= len && len <= i && i < buf_len);
+        // println!("buf[{i}] = {}, len: {}", buf[i], len);
+        if buf[i] % 2 == 0 {
+            assert!(len < buf_len);
+            buf[len] = buf[i];
+            len += 1;
+        }
+    }
+    eprintln!("rs ffirust_even_numbers_upto len: {:?}", len);
+
+    // set length
+    assert!(len < 2^8);
+    buf[1] = len as u8;
 }
 
