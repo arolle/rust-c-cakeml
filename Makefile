@@ -1,3 +1,9 @@
+ifeq ($(CAKE),)
+CAKE:=$(CAKEDIR)/cake
+endif
+
+BASIS:=$(CAKEDIR)/basis_ffi.c
+
 # Cargo package name
 RUSTNAME:=rustccakeml
 
@@ -16,14 +22,15 @@ run: even_numbers
 $(RUSTLIBPATH): src/lib.rs
 	cargo build
 
-%: %.S basis_ffi.c $(RUSTLIBPATH)
-	$(CC) $< basis_ffi.c -o $@ -L$(RUSTLIBDIR) -l$(RUSTNAME)
+%: %.S $(BASIS) ffi_extra.c $(RUSTLIBPATH)
+	$(CC) $< $(BASIS) ffi_extra.c \
+		-o $@ -L$(RUSTLIBDIR) -l$(RUSTNAME)
 
 %.S: %.cml
-	$(CAKEML) <$< >$@
+	$(CAKE) <$< >$@
 
 %.S: %.sexp
-	$(CAKEML) \
+	$(CAKE) \
 		--skip_type_inference=true \
 		--exclude_prelude=true \
 		--sexp=true \

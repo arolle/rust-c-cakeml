@@ -47,7 +47,7 @@ cml: <next instruction>
 
 For compilation we require a C compiler, `cargo` for Rust and the
 [CakeML compiler](https://github.com/CakeML/cakeml/releases) located at
-`$CAKEML/cake`. Running `make` will build `even_numbers.cml` and run it.
+`$CAKEDIR/cake`. Running `make` will build `even_numbers.cml` and run it.
 
 Example run (with added boundaries `|`):
 
